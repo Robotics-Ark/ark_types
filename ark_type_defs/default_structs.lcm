@@ -104,6 +104,12 @@ struct pose_2d_t {
 }
 
 struct velocity_2d_t {
+    float v_x;
+    float v_y;
+    float w;
+}
+
+struct wheeled_velocity_t {
     float linear;
     float angular;
 }
@@ -112,7 +118,6 @@ struct twist_t {
     float linear_velocity[3];    // [v_x, v_y, v_z]
     float angular_velocity[3];   // [omega_x, omega_y, omega_z]
 }
-
 
 struct robot_init_t {
     string name;

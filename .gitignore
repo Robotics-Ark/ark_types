@@ -1,0 +1,7 @@
+# arktypes/
+arktypes.egg-info/
+build/
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+arktypes/*.py
