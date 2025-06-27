@@ -105,3 +105,10 @@ struct laser_scan_t {
   // Scan range
   float_vector_t ranges;
 }
+
+// IMU
+struct imu_t {
+  float orientation[4]; // Orientation   [x, y, z, w]
+  float gyro[3];        // Gyroscope     [omega_x, omega_y, omega_z]
+  float accel[3];       // Accelerometer [a_x, a_y, a_z]
+}

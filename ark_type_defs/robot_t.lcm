@@ -31,6 +31,12 @@ struct joint_state_t {
     double effort[n];
 }
 
+struct force_t {
+    int64_t n;
+    string name[n];
+    float force[n];
+}
+
 struct ee_pos_t {
     position_t position;
     quaternion_t quaternion;
@@ -40,6 +46,6 @@ struct wheel_config_t {
     // Radius of the wheels.
     float radius;
 
-    // Distance between the wheels 
+    // Distance between the wheels
     float thread;
 }
