@@ -47,7 +47,7 @@ from arktypes import (
     imu_t
 )
 
-def pack_bullet_dynamics(data: Dict) -> bullet_dynamics_t:
+def bullet_dynamics(data: Dict) -> bullet_dynamics_t:
     """!
     Pack a dictionary of dynamics values into a bullet_dynamics_t message.
 
@@ -79,7 +79,7 @@ def pack_bullet_dynamics(data: Dict) -> bullet_dynamics_t:
     msg.jointLimitForce = data['jointLimitForce']
     msg.physicsClientId = data['physicsClientId']
 
-def pack_flag(data: int) -> flag_t:
+def flag(data: int) -> flag_t:
     """!
     Pack an integer value into a flag_t message.
 
@@ -90,7 +90,7 @@ def pack_flag(data: int) -> flag_t:
     msg.flag = data
     return msg
 
-def pack_int64(data: int) -> int_64_t:
+def int64(data: int) -> int_64_t:
     """!
     Pack a 64-bit integer into an int_64_t message.
 
@@ -101,7 +101,7 @@ def pack_int64(data: int) -> int_64_t:
     msg.data = data
     return msg
 
-def pack_float(data: float) -> float_t:
+def float(data: float) -> float_t:
     """!
     Pack a single float data into a float_t message.
 
@@ -112,7 +112,7 @@ def pack_float(data: float) -> float_t:
     msg.data = data
     return msg
 
-def pack_float_vector(data: np.ndarray) -> float_vector_t:
+def float_vector(data: np.ndarray) -> float_vector_t:
     """!
     Pack a list or array of float values into a float_vector_t message.
 
@@ -124,7 +124,7 @@ def pack_float_vector(data: np.ndarray) -> float_vector_t:
     msg.data = data
     return msg
 
-def pack_double_vector(data: np.ndarray) -> double_vector_t:
+def double_vector(data: np.ndarray) -> double_vector_t:
     """!
     Pack a list or array of double values into a double_vector_t message.
 
@@ -136,7 +136,7 @@ def pack_double_vector(data: np.ndarray) -> double_vector_t:
     msg.data = data
     return msg
 
-def pack_float_array(data: np.ndarray) -> float_vector_t:
+def float_array(data: np.ndarray) -> float_vector_t:
     """!
     Pack a 2D NumPy array of float values into a float_array_t message.
 
@@ -149,7 +149,7 @@ def pack_float_array(data: np.ndarray) -> float_vector_t:
     msg.data = data
     return msg
 
-def pack_double_array(data: np.ndarray) -> double_vector_t:
+def double_array(data: np.ndarray) -> double_vector_t:
     """!
     Pack a 2D NumPy array of double values into a double_array_t message.
 
@@ -162,7 +162,7 @@ def pack_double_array(data: np.ndarray) -> double_vector_t:
     msg.data = data
     return msg
 
-def pack_string(data: str) -> string_t:
+def string(data: str) -> string_t:
     """!
     Pack a Python string into a string_t message.
 
@@ -173,7 +173,7 @@ def pack_string(data: str) -> string_t:
     msg.data = data
     return msg
 
-def pack_position(x: float, y: float, z: float) -> position_t:
+def position(x: float, y: float, z: float) -> position_t:
     """!
     Pack x, y, z float values into a position_t message.
 
@@ -188,7 +188,7 @@ def pack_position(x: float, y: float, z: float) -> position_t:
     msg.z = z
     return msg
 
-def pack_quaternion(x: float, y: float, z: float, w: float) -> quaternion_t:
+def quaternion(x: float, y: float, z: float, w: float) -> quaternion_t:
     """!
     Pack x, y, z, w float values into a quaternion_t message.
 
@@ -205,7 +205,7 @@ def pack_quaternion(x: float, y: float, z: float, w: float) -> quaternion_t:
     msg.w = w
     return msg
 
-def pack_twist(linear_velocity: np.ndarray, angular_velocity: np.ndarray) -> twist_t:
+def twist(linear_velocity: np.ndarray, angular_velocity: np.ndarray) -> twist_t:
     """!
     Pack linear and angular velocity numpy arrays into a twist_t message.
 
@@ -223,7 +223,7 @@ def pack_twist(linear_velocity: np.ndarray, angular_velocity: np.ndarray) -> twi
     msg.angular_velocity = angular_velocity
     return msg
 
-def pack_robot_init(name: str, position: np.ndarray, orientation: np.ndarray, q_init: np.ndarray) -> robot_init_t:
+def robot_init(name: str, position: np.ndarray, orientation: np.ndarray, q_init: np.ndarray) -> robot_init_t:
     """!
     Pack the robot_init_t message from provided fields.
 
@@ -248,7 +248,7 @@ def pack_robot_init(name: str, position: np.ndarray, orientation: np.ndarray, q_
     msg.q_init = q_init
     return msg
 
-def pack_rigid_body_state(
+def rigid_body_state(
     name: str,
     position: np.ndarray,
     orientation: np.ndarray,
@@ -282,7 +282,7 @@ def pack_rigid_body_state(
     msg.ang_velocity = ang_velocity
     return msg
 
-def pack_service_info(data: Dict[str, Any]) -> service_info_t:
+def service_info(data: Dict[str, Any]) -> service_info_t:
     """!
     Pack a service_info_t message from a dictionary.
 
@@ -302,7 +302,7 @@ def pack_service_info(data: Dict[str, Any]) -> service_info_t:
     msg.response_type = data["response_type"]
     return msg
 
-def pack_listener_info(data: Dict[str, Any]) -> listener_info_t:
+def listener_info(data: Dict[str, Any]) -> listener_info_t:
     """!
     Pack a listener_info_t message from a dictionary.
 
@@ -316,7 +316,7 @@ def pack_listener_info(data: Dict[str, Any]) -> listener_info_t:
     msg.channel_status = data["channel_status"]
     return msg
 
-def pack_subscriber_info(data: Dict[str, Any]) -> subscriber_info_t:
+def subscriber_info(data: Dict[str, Any]) -> subscriber_info_t:
     """!
     Pack a subscriber_info_t message from a dictionary.
 
@@ -330,7 +330,7 @@ def pack_subscriber_info(data: Dict[str, Any]) -> subscriber_info_t:
     msg.channel_status = data["channel_status"]
     return msg
 
-def pack_publisher_info(data: Dict[str, Any]) -> publisher_info_t:
+def publisher_info(data: Dict[str, Any]) -> publisher_info_t:
     """!
     Pack a publisher_info_t message from a dictionary.
 
@@ -344,7 +344,7 @@ def pack_publisher_info(data: Dict[str, Any]) -> publisher_info_t:
     msg.channel_status = data["channel_status"]
     return msg
 
-def pack_comms_info(
+def comms_info(
     listeners: List[Dict[str, Any]],
     subscribers: List[Dict[str, Any]],
     publishers: List[Dict[str, Any]],
@@ -362,20 +362,20 @@ def pack_comms_info(
     msg = comms_info_t()
 
     msg.n_listeners = len(listeners)
-    msg.listeners = [pack_listener_info(ld) for ld in listeners]
+    msg.listeners = [listener_info(ld) for ld in listeners]
 
     msg.n_subscribers = len(subscribers)
-    msg.subscribers = [pack_subscriber_info(sd) for sd in subscribers]
+    msg.subscribers = [subscriber_info(sd) for sd in subscribers]
 
     msg.n_publishers = len(publishers)
-    msg.publishers = [pack_publisher_info(pd) for pd in publishers]
+    msg.publishers = [publisher_info(pd) for pd in publishers]
 
     msg.n_services = len(services)
-    msg.services = [pack_service_info(sd) for sd in services]
+    msg.services = [service_info(sd) for sd in services]
 
     return msg
 
-def pack_node_info(node_name: str, node_id: str, node_infos: Dict[str, Any]) -> node_info_t:
+def node_info(node_name: str, node_id: str, node_infos: Dict[str, Any]) -> node_info_t:
     """!
     Pack a node_info_t message with node_name, node_id, and node_infos dictionary containing listeners, subscribers, publishers, and services.
 
@@ -387,10 +387,10 @@ def pack_node_info(node_name: str, node_id: str, node_infos: Dict[str, Any]) -> 
     msg = node_info_t()
     msg.node_name = node_name
     msg.node_id = node_id
-    msg.comms = pack_comms_info(**node_infos)
+    msg.comms = comms_info(**node_infos)
     return msg
 
-def pack_network_info(nodes: List[Dict[str, Any]]) -> network_info_t:
+def network_info(nodes: List[Dict[str, Any]]) -> network_info_t:
     """!
     Pack a network_info_t message from a list of node dictionaries.
 
@@ -404,10 +404,10 @@ def pack_network_info(nodes: List[Dict[str, Any]]) -> network_info_t:
     """
     msg = network_info_t()
     msg.n_nodes = len(nodes)
-    msg.nodes = [pack_node_info(**node) for node in nodes]
+    msg.nodes = [node_info(**node) for node in nodes]
     return msg
 
-def pack_stamp(sec: int, nsec: int) -> stamp_t:
+def stamp(sec: int, nsec: int) -> stamp_t:
     """!
     Pack stamp_t from seconds and nanoseconds.
 
@@ -420,23 +420,23 @@ def pack_stamp(sec: int, nsec: int) -> stamp_t:
     msg.nsec = nsec
     return msg
 
-def pack_header(seq: int, stamp: Dict[str, int], frame_id: str) -> header_t:
+def header(seq: int, stamp_dict: Dict[str, int], frame_id: str) -> header_t:
     """!
     Pack a header_t message from individual fields.
 
     @param seq      Sequence number.
-    @param stamp    Dict with keys 'sec' and 'nsec'
+    @param stamp_dict Dict with keys 'sec' and 'nsec'.
     @param frame_id Frame identifier string.
     @return         Packed header_t message.
     """
     msg = header_t()
     msg.seq = seq
-    msg.stamp = pack_stamp(**stamp)  # Use pack_stamp to convert dict to stamp_t
+    msg.stamp = stamp(**stamp_dict)  # Use stamp to convert dict to stamp_t
     msg.frame_id = frame_id
     return msg
 
-def pack_joint_state(
-    header: Dict[str, Any],
+def joint_state(
+    header_dict: Dict[str, Any],
     name: List[str],
     position: np.ndarray,
     velocity: np.ndarray,
@@ -445,7 +445,7 @@ def pack_joint_state(
     """!
     Pack a joint_state_t message.
 
-    @param header     Dictionary with keys 'seq', 'stamp' (with 'sec' and 'nsec'), and 'frame_id'.
+    @param header_dict Dictionary with keys 'seq', 'stamp' (with 'sec' and 'nsec'), and 'frame_id'.
     @param name       List of joint names.
     @param position   Numpy array of joint positions.
     @param velocity   Numpy array of joint velocities.
@@ -454,7 +454,7 @@ def pack_joint_state(
     """
     assert len(name) == len(position) == len(velocity) == len(effort), "All joint arrays must be of the same length"
     msg = joint_state_t()
-    msg.header = pack_header(**header)
+    msg.header = header(**header_dict)
     msg.n = len(name)
     msg.name = name
     msg.position = position
@@ -462,7 +462,7 @@ def pack_joint_state(
     msg.effort = effort
     return msg
 
-def pack_force(name: List[str], force: np.ndarray) -> force_t:
+def force(name: List[str], force: np.ndarray) -> force_t:
     """
     @brief Packs force data into a force_t message.
 
@@ -477,24 +477,24 @@ def pack_force(name: List[str], force: np.ndarray) -> force_t:
     msg.force = force
     return msg
 
-def pack_ee_pos(position: np.ndarray, quaternion: np.ndarray) -> ee_pos_t:
+def ee_pos(pos: np.ndarray, quat: np.ndarray) -> ee_pos_t:
     """!
     Pack an ee_pos_t message.
 
-    @param position     A numpy array of shape (3,) representing [x, y, z].
-    @param quaternion   A numpy array of shape (4,) representing [x, y, z, w].
+    @param pos          A numpy array of shape (3,) representing [x, y, z].
+    @param quat         A numpy array of shape (4,) representing [x, y, z, w].
     @return             Packed ee_pos_t message.
     """
     msg = ee_pos_t()
-    msg.position = pack_position(position)
-    msg.quaternion = pack_quaternion(quaternion)
+    msg.position = position(pos)
+    msg.quaternion = quaternion(quat)
     return msg
 
-def pack_image(image: np.ndarray, name: str = "") -> image_t:
+def image(img: np.ndarray, name: str = "") -> image_t:
     """!
     Converts an BGR image (as a NumPy array) into a serialized image_t message with compression.
 
-    @param image The BGR image (NumPy array) to pack.
+    @param img   The BGR image (NumPy array) to pack.
     @param name An optional name used to generate the frame name.
     @return An image_t message containing the encoded image and metadata, or None if encoding fails.
     """
@@ -504,7 +504,7 @@ def pack_image(image: np.ndarray, name: str = "") -> image_t:
     msg.frame_name = f"{name}_frame"
 
     # Get image dimensions
-    height, width, _ = image.shape
+    height, width, _ = img.shape
     msg.height = height
     msg.width = width
 
@@ -516,10 +516,10 @@ def pack_image(image: np.ndarray, name: str = "") -> image_t:
     msg.bigendian = False
 
     # Set row_stride
-    msg.row_stride = image.strides[0]  # Number of bytes per row
+    msg.row_stride = img.strides[0]  # Number of bytes per row
 
     # Compress the image using the selected method
-    success, encoded_image = cv2.imencode('.png', image)
+    success, encoded_image = cv2.imencode('.png', img)
     if success:
         data = array.array('B', encoded_image.tobytes())
         msg.data = data
@@ -533,11 +533,11 @@ def pack_image(image: np.ndarray, name: str = "") -> image_t:
 
     return msg
 
-def pack_depth(depth: np.ndarray, name: str = "") -> image_t:
+def depth(depth_map: np.ndarray, name: str = "") -> image_t:
     """!
     Converts a depth image (as a NumPy array) into a compressed image_t message using zlib compression.
 
-    @param depth A 2D NumPy array containing depth values in meters.
+    @param depth_map A 2D NumPy array containing depth values in meters.
     @param name An optional name used to generate the frame name.
     @return An image_t message containing the compressed depth image and metadata.
     """
@@ -547,7 +547,7 @@ def pack_depth(depth: np.ndarray, name: str = "") -> image_t:
     msg.frame_name = f"{name}_frame"
 
     # Get image dimensions
-    height, width = depth.shape
+    height, width = depth_map.shape
     msg.height = height
     msg.width = width
 
@@ -559,11 +559,11 @@ def pack_depth(depth: np.ndarray, name: str = "") -> image_t:
     msg.bigendian = False
 
     # Set row_stride
-    msg.row_stride = depth.strides[0]  # Number of bytes per row
+    msg.row_stride = depth_map.strides[0]  # Number of bytes per row
 
     # Compress the depth using zlib
-    depth = (depth * 1000).astype(np.uint16) # Convert to mm
-    depth_bytes = depth.tobytes()  # Convert depth map to raw bytes
+    depth_map = (depth_map * 1000).astype(np.uint16) # Convert to mm
+    depth_bytes = depth_map.tobytes()  # Convert depth map to raw bytes
     compressed_depth = zlib.compress(depth_bytes)
 
     # Add to message
@@ -574,27 +574,27 @@ def pack_depth(depth: np.ndarray, name: str = "") -> image_t:
     msg.compression_method = image_t.COMPRESSION_METHOD_ZLIB
     return msg
 
-def pack_rgbd(image: np.ndarray, depth: np.ndarray, name: str = "") -> rgbd_t:
+def rgbd(rgb_image: np.ndarray, depth_map: np.ndarray, name: str = "") -> rgbd_t:
     """!
     Packs an RGB image and a depth map into a single rgbd_t message.
 
-    This function uses `pack_image` to encode the RGB image and `pack_depth` to encode the depth image,
+    This function uses `image` to encode the RGB image and `depth` to encode the depth image,
     combining them into a single RGB-D message structure.
 
-    @param image The RGB image (typically a NumPy array) to be packed.
-    @param depth The depth image (typically a NumPy array) to be packed.
+    @param rgb_image The RGB image (typically a NumPy array) to be packed.
+    @param depth_map The depth image (typically a NumPy array) to be packed.
     @param name An optional name used to generate frame names for both components.
     @return An rgbd_t message containing the packed RGB and depth data.
     """
-    image_msg = pack_image(image, name=name)
-    depth_msg = pack_depth(depth, name=name)
+    image_msg = image(rgb_image, name=name)
+    depth_msg = depth(depth_map, name=name)
 
     msg = rgbd_t()
     msg.image = image_msg
     msg.depth = depth_msg
     return msg
 
-def pack_image_array(timestamp_ns: int, images: Union[List[np.ndarray], np.ndarray]) -> image_array_t:
+def image_array(timestamp_ns: int, images: Union[List[np.ndarray], np.ndarray]) -> image_array_t:
     """!
     Pack an image_array_t message.
 
@@ -606,7 +606,7 @@ def pack_image_array(timestamp_ns: int, images: Union[List[np.ndarray], np.ndarr
         # If it's a stacked array, split along axis 0
         images = [img for img in images]
 
-    packed_images = [pack_image(img) for img in images]
+    packed_images = [image(img) for img in images]
 
     msg = image_array_t()
     msg.timestamp_ns = timestamp_ns
@@ -614,25 +614,25 @@ def pack_image_array(timestamp_ns: int, images: Union[List[np.ndarray], np.ndarr
     msg.images = packed_images
     return msg
 
-def pack_laser_scan(angles: np.ndarray, ranges: np.ndarray) -> laser_scan_t:
+def laser_scan(angles: np.ndarray, ranges: np.ndarray) -> laser_scan_t:
     """!
     Pack angle and range data into a laser_scan_t message.
 
-    This function uses pack_float_vector to wrap both arrays into the appropriate message format.
+    This function uses float_vector to wrap both arrays into the appropriate message format.
 
     @param angles  A 1D NumPy array of LiDAR angles.
     @param ranges  A 1D NumPy array of LiDAR ranges corresponding to the angles.
     @return A laser_scan_t message containing the packed angle and range data.
     """
-    angles_msg = pack_float_vector(angles)
-    ranges_msg = pack_float_vector(ranges)
+    angles_msg = float_vector(angles)
+    ranges_msg = float_vector(ranges)
 
     msg = laser_scan_t()
     msg.angles = angles_msg
     msg.ranges = ranges_msg
     return msg
 
-def pack_pose(position: np.ndarray, orientation: np.ndarray) -> pose_t:
+def pose(position: np.ndarray, orientation: np.ndarray) -> pose_t:
     """!
     Pack position and orientation numpy arrays into a pose_t message.
 
@@ -650,7 +650,7 @@ def pack_pose(position: np.ndarray, orientation: np.ndarray) -> pose_t:
     msg.orientation = orientation
     return msg
 
-def pack_pose_2d(x: float, y: float, theta: float) -> pose_2d_t:
+def pose_2d(x: float, y: float, theta: float) -> pose_2d_t:
     """!
     Pack 2D pose information into a pose_2d_t message.
 
@@ -665,7 +665,7 @@ def pack_pose_2d(x: float, y: float, theta: float) -> pose_2d_t:
     msg.theta = theta
     return msg
 
-def pack_velocity_2d(v_x: float, v_y: float, w: float) -> velocity_2d_t:
+def velocity_2d(v_x: float, v_y: float, w: float) -> velocity_2d_t:
     """!
     Pack 2D velocity information into a velocity_2d_t message.
 
@@ -680,7 +680,7 @@ def pack_velocity_2d(v_x: float, v_y: float, w: float) -> velocity_2d_t:
     msg.w = w
     return msg
 
-def pack_wheeled_velocity(linear_velocity: float, angular_velocity: float) -> wheeled_velocity_t:
+def wheeled_velocity(linear_velocity: float, angular_velocity: float) -> wheeled_velocity_t:
     """!
     Pack 2D velocity information into a velocity_t message.
 
@@ -693,7 +693,7 @@ def pack_wheeled_velocity(linear_velocity: float, angular_velocity: float) -> wh
     msg.angular = angular_velocity
     return msg
 
-def pack_joint_group_command(cmd: List, name: str) -> joint_group_command_t:
+def joint_group_command(cmd: List, name: str) -> joint_group_command_t:
     """!
     Pack joint group command into a joint_ground_command_t message.
 
@@ -707,7 +707,7 @@ def pack_joint_group_command(cmd: List, name: str) -> joint_group_command_t:
     msg.cmd = cmd
     return msg
 
-def pack_joint_single_command(name: str, cmd: float) -> joint_single_command_t:
+def joint_single_command(name: str, cmd: float) -> joint_single_command_t:
     """!
     Pack a joint_single_command_t message from name and command value.
 
@@ -720,7 +720,7 @@ def pack_joint_single_command(name: str, cmd: float) -> joint_single_command_t:
     msg.cmd = cmd
     return msg
 
-def pack_grid_config(scene_bounds: Dict[str, List[float]], grid_size: float) -> grid_config_t:
+def grid_config(scene_bounds: Dict[str, List[float]], grid_size: float) -> grid_config_t:
     """!
     Pack grid_config into a grid_config_t message.
 
@@ -734,7 +734,7 @@ def pack_grid_config(scene_bounds: Dict[str, List[float]], grid_size: float) -> 
     msg.grid_size = grid_size
     return msg
 
-def pack_wheel_config(radius: float, thread: float) -> wheel_config_t:
+def wheel_config(radius: float, thread: float) -> wheel_config_t:
     """!
     Packs wheel configuration data into a wheel_config_t message.
 
@@ -749,7 +749,7 @@ def pack_wheel_config(radius: float, thread: float) -> wheel_config_t:
     return msg
 
 
-def pack_imu(orientation: np.ndarray, gyro: np.ndarray, accel: np.ndarray) -> imu_t:
+def imu(orientation: np.ndarray, gyro: np.ndarray, accel: np.ndarray) -> imu_t:
     """!
     Packs IMU data into an imu_t message.
 
