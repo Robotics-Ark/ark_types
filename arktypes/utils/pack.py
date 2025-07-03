@@ -44,7 +44,8 @@ from arktypes import (
     joint_group_command_t,
     grid_config_t,
     wheel_config_t,
-    imu_t
+    imu_t,
+    task_space_command_t,
 )
 
 def bullet_dynamics(data: Dict) -> bullet_dynamics_t:
@@ -770,4 +771,28 @@ def imu(orientation: np.ndarray, gyro: np.ndarray, accel: np.ndarray) -> imu_t:
     msg.orientation = orientation
     msg.gyro = gyro
     msg.accel = accel
+    return msg
+
+def task_space_command(name: str, position_values: np.ndarray, quaternion_values: np.ndarray) -> task_space_command_t:
+    """!
+    Packs task space command data into a task_space_command_t message.
+
+    Constructs a task_space_command_t message using provided task space command data:
+    @param position     A numpy array of shape (3,) representing the desired position.
+    @param orientation  A numpy array of shape (4,) representing the desired orientation as a quaternion.
+    @return A task_space_command_t message containing the packed task space command data.
+    """
+    msg = task_space_command_t()
+    if position_values.shape != (3,):
+        raise ValueError(f"position must be a numpy array with shape (3,), got {position_values.shape}")
+    if quaternion_values.shape != (4,):
+        raise ValueError(f"orientation must be a numpy array with shape (4,), got {quaternion_values.shape}")
+
+    # convert to lists
+    position_list = position_values.tolist()
+    quaternion_list = quaternion_values.tolist()
+
+    msg.name = name
+    msg.position = position(x=position_list[0], y=position_list[1], z=position_list[2])
+    msg.quaternion = quaternion(x=quaternion_list[0], y=quaternion_list[1], z=quaternion_list[2], w=quaternion_list[3])
     return msg

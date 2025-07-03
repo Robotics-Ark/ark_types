@@ -22,6 +22,12 @@ struct joint_single_command_t {
     float cmd;
 }
 
+struct task_space_command_t { 
+    string name;
+    position_t position;
+    quaternion_t quaternion;
+}
+
 struct joint_state_t {
     header_t header;
     int64_t n;

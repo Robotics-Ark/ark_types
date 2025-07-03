@@ -43,7 +43,8 @@ from arktypes import (
     joint_group_command_t,
     grid_config_t,
     wheel_config_t,
-    imu_t
+    imu_t,
+    task_space_command_t,
 )
 
 def bullet_dynamics(msg: bullet_dynamics_t) -> Dict:
@@ -635,3 +636,18 @@ def imu(msg: imu_t) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     gyro = np.array(msg.gyro)
     accel = np.array(msg.accel)
     return orientation, gyro, accel
+
+def task_space_command(msg: task_space_command_t) -> Tuple[str, np.ndarray, np.ndarray]:
+    """!
+    Unpack a task_space_command_t message into its components.
+
+    @param msg  A task_space_command_t message.
+    @return     A tuple containing:
+                - name: The name of the task space command.
+                - position: A numpy array representing the position.
+                - quaternion: A numpy array representing the quaternion orientation.
+    """
+    name = msg.name
+    position_arr = position(msg.position)
+    quaternion_arr = quaternion(msg.quaternion)
+    return name, position_arr, quaternion_arr
