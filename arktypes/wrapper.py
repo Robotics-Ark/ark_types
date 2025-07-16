@@ -211,12 +211,115 @@ from _arktypes_info.service_info_t import service_info_t as _service_info_t
 from _arktypes_info.subscriber_info_t import subscriber_info_t as _subscriber_info_t
 
 
+def _info_decode(data: bytes, _info_class, info_class):
+    _info = _info_class.decode(data)
+    info = info_class()
+    for key in info.__slots__:
+        setattr(info, key, getattr(_info, key))
+    return info
+
+
+def _info_from_dict(data: dict[str, Any], info_class):
+    """Create an info_class instance from a dictionary."""
+    info = info_class()
+    for key in info.__slots__:
+        if key in data:
+            setattr(info, key, data[key])
+        else:
+            raise KeyError(f"Key '{key}' not found in the provided dictionary.")
+    return info
+
+
+def _info_as_dict(info, info_class):
+    d = {}
+    for key in info_class.__slots__:
+        if hasattr(info, key):
+            d[key] = getattr(info, key)
+        else:
+            raise KeyError(f"Key '{key}' not found in the info object.")
+    return d
+
+
+class listener_info_t(_listener_info_t):
+
+    @staticmethod
+    def decode(data: bytes):
+        return _info_decode(data, _listener_info_t, listener_info_t)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return _info_from_dict(data, listener_info_t)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Convert listener_info_t to a dictionary."""
+        return _info_as_dict(self, listener_info_t)
+
+
+class publisher_info_t(_publisher_info_t):
+
+    @staticmethod
+    def decode(data: bytes):
+        return _info_decode(data, _publisher_info_t, publisher_info_t)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return _info_from_dict(data, publisher_info_t)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Convert publisher_info_t to a dictionary."""
+        return _info_as_dict(self, publisher_info_t)
+
+
+class subscriber_info_t(_subscriber_info_t):
+
+    @staticmethod
+    def decode(data: bytes):
+        return _info_decode(data, _subscriber_info_t, subscriber_info_t)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return _info_from_dict(data, subscriber_info_t)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Convert subscriber_info_t to a dictionary."""
+        return _info_as_dict(self, subscriber_info_t)
+
+
+class service_info_t(_service_info_t):
+
+    @staticmethod
+    def decode(data: bytes):
+        return _info_decode(data, _service_info_t, service_info_t)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return _info_from_dict(data, service_info_t)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Convert service_info_t to a dictionary."""
+        return _info_as_dict(self, service_info_t)
+
+
 class comms_info_t(_comms_info_t):
 
     @staticmethod
     def decode(data: bytes):
-        info = _comms_info_t.decode(data)
-        return comms_info_t.from_dict(info.to_dict())
+        _info = _comms_info_t.decode(data)
+        info = comms_info_t()
+        info.n_listeners = _info.n_listeners
+        info.listeners = [listener_info_t.decode(_l.encode()) for _l in _info.listeners]
+        info.n_subscribers = _info.n_subscribers
+        info.subscribers = [
+            subscriber_info_t.decode(_s.encode()) for _s in _info.subscribers
+        ]
+        info.n_publishers = _info.n_publishers
+        info.publishers = [
+            publisher_info_t.decode(_p.encode()) for _p in _info.publishers
+        ]
+        info.n_services = _info.n_services
+        info.services = [service_info_t.decode(_s.encode()) for _s in _info.services]
+
+        return info
 
     @classmethod
     def from_lists(
@@ -236,6 +339,64 @@ class comms_info_t(_comms_info_t):
         info.n_services = len(services)
         info.services = [service_info_t.from_dict(s) for s in services]
         return info
+
+    def as_lists(
+        self,
+    ) -> tuple[
+        list[dict[str, Any]],
+        list[dict[str, Any]],
+        list[dict[str, Any]],
+        list[dict[str, Any]],
+    ]:
+        """Convert comms_info_t to lists of dictionaries."""
+        listeners = [l.as_dict() for l in self.listeners]
+        subscribers = [s.as_dict() for s in self.subscribers]
+        publishers = [p.as_dict() for p in self.publishers]
+        services = [s.as_dict() for s in self.services]
+        return listeners, subscribers, publishers, services
+
+
+class node_info_t(_node_info_t):
+
+    @staticmethod
+    def decode(data: bytes):
+        _info = _node_info_t.decode(data)
+        info = node_info_t()
+        info.node_name = _info.node_name
+        info.node_id = _info.node_id
+        info.comms_info = comms_info_t.decode(_info.comms_info.encode())
+        return info
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        """Create a node_info_t from a dictionary."""
+        info = cls()
+        info.node_name = data["node_name"]
+        info.node_id = data["node_id"]
+        if "comms_info" in data:
+            info.comms_info = comms_info_t.from_dict(data["comms_info"])
+        else:
+            info.comms_info = comms_info_t()
+        return info
+
+    def as_dict(self) -> dict[str, Any]:
+        """Convert node_info_t to a dictionary."""
+        d = {
+            "node_name": self.node_name,
+            "node_id": self.node_id,
+            "comms_info": self.comms_info.as_dict(),
+        }
+        return d
+
+
+class network_info_t(_network_info_t):
+
+    @staticmethod
+    def decode(data: bytes):
+        _info = _network_info_t.decode(data)
+        info = network_info_t()
+        info.node_name = _info.node_name
+        info.node_id = _info.node_id
 
 
 ####################################################################################
