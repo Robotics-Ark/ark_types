@@ -26,6 +26,7 @@ struct task_space_command_t {
     string name;
     position_t position;
     quaternion_t quaternion;
+    float gripper;
 }
 
 struct joint_state_t {

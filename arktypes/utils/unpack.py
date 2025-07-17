@@ -637,7 +637,7 @@ def imu(msg: imu_t) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     accel = np.array(msg.accel)
     return orientation, gyro, accel
 
-def task_space_command(msg: task_space_command_t) -> Tuple[str, np.ndarray, np.ndarray]:
+def task_space_command(msg: task_space_command_t) -> Tuple[str, np.ndarray, np.ndarray, float]:
     """!
     Unpack a task_space_command_t message into its components.
 
@@ -650,4 +650,5 @@ def task_space_command(msg: task_space_command_t) -> Tuple[str, np.ndarray, np.n
     name = msg.name
     position_arr = position(msg.position)
     quaternion_arr = quaternion(msg.quaternion)
-    return name, position_arr, quaternion_arr
+    gripper_val = msg.gripper  # Assuming gripper is a float value
+    return name, position_arr, quaternion_arr, gripper_val
