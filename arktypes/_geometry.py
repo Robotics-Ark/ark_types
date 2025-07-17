@@ -9,6 +9,8 @@ from scipy.spatial.transform import Rotation as Rot
 from _arktypes_geometry.vector3_t import vector3_t as _vector3_t
 from _arktypes_geometry.quaternion_t import quaternion_t as _quaternion_t
 from _arktypes_geometry.transform_t import transform_t as _transform_t
+from _arktypes_geometry.wrench_t import wrench_t as _wrench_t
+from _arktypes_geometry.twist_t import twist_t as _twist_t
 
 
 # ----------------------------------------------------------------------
@@ -40,8 +42,6 @@ def _add_array_helpers(cls):
 # ----------------------------------------------------------------------
 # helpers specific to vector3_t
 # ----------------------------------------------------------------------
-
-
 def _add_vector3_helpers(cls):
 
     # -------- factory --------
@@ -108,6 +108,7 @@ def _add_rotation_helpers(cls):
 def _add_transform_helpers(cls):
     """Attach .as_array()."""
 
+    # -------- read --------
     def as_array(self) -> np.ndarray:
         tf = np.eye(4)
         tf[:3, 3] = self.translation.as_array()
@@ -136,6 +137,68 @@ def _add_transform_helpers(cls):
 
 
 # ----------------------------------------------------------------------
+# helpers specific to twist_t
+# ----------------------------------------------------------------------
+def _add_twist_helpers(cls):
+
+    # -------- read --------
+    def as_array(self, linear_first: bool = True):
+        l = self.linear.as_array()
+        a = self.angular.as_array()
+        return np.concatenate((l, a) if linear_first else (a, l))
+
+    # -------- factory --------
+    @classmethod
+    def from_array(c, array, linear_first: bool = True):
+        if len(array) != 6:
+            raise ValueError(f"array must be length 6, got {len(array)}")
+        if linear_first:
+            l, a = array[:3], array[3:6]
+        else:
+            a, l = array[:3], array[3:6]
+        obj = c()
+        obj.linear = vector3_t.from_array(l)
+        obj.angular = vector3_t.from_array(a)
+        return obj
+
+    cls.as_array = as_array  # type: ignore[attr-defined]
+    cls.from_array = from_array  # type: ignore[attr-defined]
+
+    return cls
+
+
+# ----------------------------------------------------------------------
+# helpers specific to wrench_t
+# ----------------------------------------------------------------------
+def _add_wrench_helpers(cls):
+
+    # -------- read --------
+    def as_array(self, force_first: bool = True):
+        l = self.linear.as_array()
+        a = self.angular.as_array()
+        return np.concatenate((l, a) if linear_first else (a, l))
+
+    # -------- factory --------
+    @classmethod
+    def from_array(c, array, linear_first: bool = True):
+        if len(array) != 6:
+            raise ValueError(f"array must be length 6, got {len(array)}")
+        if linear_first:
+            l, a = array[:3], array[3:6]
+        else:
+            a, l = array[:3], array[3:6]
+        obj = c()
+        obj.linear = vector3_t.from_array(l)
+        obj.angular = vector3_t.from_array(a)
+        return obj
+
+    cls.as_array = as_array  # type: ignore[attr-defined]
+    cls.from_array = from_array  # type: ignore[attr-defined]
+
+    return cls
+
+
+# ----------------------------------------------------------------------
 # patch the raw classes in‑place
 # ----------------------------------------------------------------------
 _add_array_helpers(_vector3_t)
@@ -146,12 +209,18 @@ _add_rotation_helpers(_quaternion_t)
 
 _add_transform_helpers(_transform_t)
 
+_add_twist_helpers(_twist_t)
+
+_add_wrench_helpers(_wrench_t)
+
 # ----------------------------------------------------------------------
 # re‑export under user‑friendly names
 # ----------------------------------------------------------------------
 vector3_t = _vector3_t
 quaternion_t = _quaternion_t
 transform_t = _transform_t
+twist_t = _twist_t
+wrench_t = _wrench_t
 
 __all__ = [
     "vector3_t",
