@@ -177,22 +177,24 @@ def _add_wrench_helpers(cls):
 
     # -------- read --------
     def as_array(self, force_first: bool = True):
-        l = self.linear.as_array()
-        a = self.angular.as_array()
-        return np.concatenate((l, a) if linear_first else (a, l))
+        f = self.force.as_array()
+        t = self.torque.as_array()
+        return np.concatenate((f, t) if force_first else (t, f))
 
     # -------- factory --------
     @classmethod
-    def from_array(c, array, linear_first: bool = True):
+    def from_array(c, array, force_first: bool = True):
         if len(array) != 6:
             raise ValueError(f"array must be length 6, got {len(array)}")
-        if linear_first:
-            l, a = array[:3], array[3:6]
+        if force_first:
+            f, t = array[:3], array[3:6]
         else:
-            a, l = array[:3], array[3:6]
+            t, f = array[:3], array[3:6]
+
         obj = c()
-        obj.linear = vector3_t.from_array(l)
-        obj.angular = vector3_t.from_array(a)
+        obj.force = vector3_t.from_array(f)
+        obj.torque = vector3_t.from_array(t)
+
         return obj
 
     cls.as_array = as_array  # type: ignore[attr-defined]
