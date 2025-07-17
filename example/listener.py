@@ -1,6 +1,6 @@
 from lcm import LCM
-from arktypes import transform_t
 import numpy as np
+from arktypes import transform_t
 
 np.set_printoptions(precision=3, suppress=True, linewidth=1000)
 

@@ -11,13 +11,15 @@ def generate_transform(t):
     x = np.sin(2 * pi * t)
     y = 0.5 * np.cos(2 * pi * t)
     z = -0.5 * np.sin(2 * pi * t)
-    tr = [x, y, z]
 
     # Create rotation
     rz = pi * np.sin(2 * pi * t)
-    ro = Rot.from_euler("xyz", [0, 0, rz])
 
-    return transform_t.from_arrays(tr, ro)
+    tf = np.eye(4)
+    tf[:3, 3] = [x, y, z]
+    tf[:3, :3] = Rot.from_euler("xyz", [0, 0, rz]).as_matrix()
+
+    return transform_t.from_array(tf)
 
 
 def main():
