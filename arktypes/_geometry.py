@@ -20,9 +20,11 @@ def _add_array_helpers(cls):
     """Attach .as_array() and .from_array()."""
     slots = cls.__slots__
 
+    # -------- read --------
     def as_array(self) -> list[float]:
         return [getattr(self, name) for name in slots]
 
+    # -------- factory --------
     @classmethod
     def from_array(c, seq) -> "c":  # type: ignore[name-defined]
         if len(seq) != len(slots):
@@ -36,6 +38,7 @@ def _add_array_helpers(cls):
 
     cls.as_array = as_array  # type: ignore[attr-defined]
     cls.from_array = from_array  # type: ignore[attr-defined]
+
     return cls
 
 
