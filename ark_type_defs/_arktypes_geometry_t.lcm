@@ -1,29 +1,62 @@
 package _arktypes_geometry;
 
+// Messages for common geometric primitives.
+
+// A three‑dimensional vector in free space.
 struct vector3_t {
+
+    // X‑axis position.
     float x;
+
+    // Y‑axis position.
     float y;
+
+    // Z‑axis position.
     float z;
 }
 
+// An orientation in free space in quaternion form.
 struct quaternion_t {
+
+    // X component of the quaternion’s vector part.
     float x;
+
+    // Y component of the quaternion’s vector part.
     float y;
+
+    // Z component of the quaternion’s vector part.
     float z;
+
+    // W component (scalar part) of the quaternion.
     float w;
 }
 
+// A transform between two coordinate frames in free space.
 struct transform_t {
+
+    // Translation of the child frame origin relative to the parent.
     vector3_t translation;
+
+    // Rotation of the child frame relative to the parent.
     quaternion_t rotation;
 }
 
+// Velocity in free space separated into its linear and angular parts.
 struct twist_t {
+
+    // Linear velocity of the origin, expressed in the child frame.
     vector3_t linear;
+
+    // Angular velocity about the origin, expressed in the child frame.
     vector3_t angular;
 }
 
+// A force in free space separated into its linear and angular parts.
 struct wrench_t {
+
+    // Net force applied at the origin, expressed in the child frame.
     vector3_t force;
+
+    // Net torque about the origin, expressed in the child frame.
     vector3_t torque;
 }

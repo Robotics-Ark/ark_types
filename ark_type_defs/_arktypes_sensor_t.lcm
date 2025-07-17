@@ -1,5 +1,44 @@
 package _arktypes_sensor;
 
+// Messages for commonly used sensors.
+
+// Joint state information for a multi‑DoF robot.
+struct joint_state_t {
+    // Number of degrees of freedom.
+    int16_t ndof;
+
+    // Name of each joint, indexed 0‥ndof‑1.
+    string name[ndof];
+
+    // Position of each joint, one‑to‑one with `name`.
+    float position[ndof];
+
+    // Velocity of each joint, one‑to‑one with `name`.
+    float velocity[ndof];
+
+    // Actuator effort or commanded torque for each joint.
+    float effort[ndof];
+
+    // External torque estimated or sensed at each joint.
+    float ext_torque[ndof];
+}
+
+// Joystick state message.
+struct joy_t {
+
+    // Number of analog axes reported by the device.
+    int8_t naxes;
+
+    // Current value of each axis (typically normalized in [-1, 1]).
+    float axes[naxes];
+
+    // Number of buttons on the device.
+    int8_t nbuttons;
+
+    // Current state of each button (0 = released, non-zero = pressed).
+    int32_t buttons[nbuttons];
+}
+
 // A representation of an image.
 struct image_t {
 
@@ -68,45 +107,35 @@ struct image_t {
   const int8_t COMPRESSION_METHOD_INVALID        = -1;
 }
 
-
-
-// This is used for sending and/or receiving multiple images at the same time.
-struct image_array_t {
-  // The timestamp and the frame name.
-  // The timestamp holds when this data is packed. It's convenient to store
-  // the latest timestamp among the timestamps in `images` since it is possible
-  // for each of `images` having different timestamps if their camera's shutters
-  // are not synchronized.
-
-  // The timestamp in nanoseconds.
-  int64_t timestamp_ns;
-
-  // The number of images.
-  int32_t num_images;
-
-  // An array of image_t.
-  image_t images[num_images];
-}
-
 // Synchronized RGBD (Image + Depth)
 struct rgbd_t {
   // RGB image.
   image_t image;
 
-  // Depth map
+  // Depth map.
   image_t depth;
 }
 
 // Laser Scan
 struct laser_scan_t {
-  int64_t n;
-  float angles[n];
-  float ranges[n];
+    // Number of valid samples in this scan.
+    int64_t n;
+
+    // Bearing angle of each laser beam, indexed 0..n‑1.
+    float angles[n];
+
+    // Distance measured along each beam, matched 1‑to‑1 with `angles`.
+    float ranges[n];
 }
 
 // IMU
 struct imu_t {
-  _arktypes_geometry.quaternion_t orientation;
-  _arktypes_geometry.vector3_t gyro;
-  _arktypes_geometry.vector3_t accel;
+    // Orientation of the IMU sensor expressed as a quaternion.
+    _arktypes_geometry.quaternion_t orientation;
+
+    // Angular velocity of the sensor frame.
+    _arktypes_geometry.vector3_t angular_velocity;
+
+    // Linear acceleration of the sensor frame.
+    _arktypes_geometry.vector3_t linear_acceleration;
 }
