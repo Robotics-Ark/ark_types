@@ -1,8 +1,7 @@
 from setuptools import setup, find_packages
 import subprocess
 
-# Ensure the Makefile is executed to generate LCM types
-subprocess.check_call(["make", "clean"])  # ensure a clean build
+# Build message types before installing arktypes
 subprocess.check_call(["make"])
 
 # Load requirements
