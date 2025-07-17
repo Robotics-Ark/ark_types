@@ -773,7 +773,7 @@ def imu(orientation: np.ndarray, gyro: np.ndarray, accel: np.ndarray) -> imu_t:
     msg.accel = accel
     return msg
 
-def task_space_command(name: str, position_values: np.ndarray, quaternion_values: np.ndarray) -> task_space_command_t:
+def task_space_command(name: str, position_values: np.ndarray, quaternion_values: np.ndarray, gripper_values: float) -> task_space_command_t:
     """!
     Packs task space command data into a task_space_command_t message.
 
@@ -795,4 +795,5 @@ def task_space_command(name: str, position_values: np.ndarray, quaternion_values
     msg.name = name
     msg.position = position(x=position_list[0], y=position_list[1], z=position_list[2])
     msg.quaternion = quaternion(x=quaternion_list[0], y=quaternion_list[1], z=quaternion_list[2], w=quaternion_list[3])
+    msg.gripper = gripper_values  # Assuming gripper is a float value
     return msg
