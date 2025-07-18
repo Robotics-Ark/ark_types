@@ -28,9 +28,9 @@ def _get_named_item(
         return arr[x]
     elif isinstance(x, str):
         name_arr = getattr(self, name_attr)
-        return _get_item(self, attr_name, name_attr_array, name_arr.index(x))
+        return _get_named_item(self, attr_name, name_attr_array, name_arr.index(x))
     elif isinstance(x, list):
-        return [_get_item(self, name_attr, name_attr_array) for i in x]
+        return [_get_named_item(self, name_attr, name_attr_array) for i in x]
     else:
         raise ValueError(f"x must be a 'str' or 'int', got {type(x)}")
 
@@ -38,8 +38,6 @@ def _get_named_item(
 # ----------------------------------------------------------------------
 # helpers specific to joint_state_t
 # ----------------------------------------------------------------------
-
-
 def _add_joint_state_helpers(cls):
 
     # -------- read --------
