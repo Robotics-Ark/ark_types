@@ -1,0 +1,28 @@
+package lcmtypes;
+
+struct ps4_controller_state_t {
+
+    // Button states: A mapping of buttons (True = pressed, False = not pressed)
+    boolean cross_x;                   // Cross (X)
+    boolean circle_o;                  // Circle (O)
+    boolean triangle;                  // Triangle
+    boolean square;                    // Square
+    boolean l1;                        // L1
+    boolean r1;                        // R1
+    boolean share;                     // Share
+    boolean options;                   // Options
+    boolean l3_left_stick_click;       // L3 (Left Stick Click)
+    boolean r3_right_stick_click;      // R3 (Right Stick Click)
+    boolean ps_button;                 // PS Button
+    boolean touchpad_click;            // Touchpad Click
+
+    // Axis states: Ranges from 0 to 255, where 128 is neutral
+    int16_t left_stick_horizontal;    // Left Stick Horizontal (0 - 255, neutral at 128)
+    int16_t left_stick_vertical;      // Left Stick Vertical (0 - 255, neutral at 128)
+    int16_t right_stick_horizontal;   // Right Stick Horizontal (0 - 255, neutral at 128)
+    int16_t right_stick_vertical;     // Right Stick Vertical (0 - 255, neutral at 128)
+    int16_t l2_trigger;               // L2 Trigger (0 - 255, neutral at 128)
+    int16_t r2_trigger;               // R2 Trigger (0 - 255, neutral at 128)
+    int16_t dpad_horizontal;          // D-Pad Horizontal (0 - 255, neutral at 128)
+    int16_t dpad_vertical;            // D-Pad Vertical (0 - 255, neutral at 128)
+}
