@@ -15,39 +15,45 @@ from _arktypes_sensor.imu_t import imu_t as _imu_t
 
 
 # ----------------------------------------------------------------------
+# generic helpers
+# ----------------------------------------------------------------------
+def _get_named_item(
+    self,
+    name_attr: str,
+    name_attr_array: str,
+    x: str | int | list[str] | list[int],
+):
+    if isinstance(x, int):
+        arr = getattr(self, name_attr_array)
+        return arr[x]
+    elif isinstance(x, str):
+        name_arr = getattr(self, name_attr)
+        return _get_item(self, attr_name, name_attr_array, name_arr.index(x))
+    elif isinstance(x, list):
+        return [_get_item(self, name_attr, name_attr_array) for i in x]
+    else:
+        raise ValueError(f"x must be a 'str' or 'int', got {type(x)}")
+
+
+# ----------------------------------------------------------------------
 # helpers specific to joint_state_t
 # ----------------------------------------------------------------------
+
+
 def _add_joint_state_helpers(cls):
 
     # -------- read --------
-    def _get_item(self, attr: str, x: str | int | list[str] | list[int]):
-        if isinstance(x, int):
-            arr = getattr(self, attr)
-            return arr[p]
-        elif isinstance(p, str):
-            return _get_item(self, attr, self.name.index(p))
-        elif isinstance(p, list):
-            if isinstance(p[0], (int, str)):
-                return [_get_item(i) for i in p]
-            else:
-                raise ValueError(
-                    "when x is a list then the elements should all be either 'str' or 'int', "
-                    f"got instead '{type(p[0])}'"
-                )
-        else:
-            raise ValueError(f"x must be a 'str' or 'int', got {type(x)}")
-
     def get_position(self, p: str | int):
-        return _get_item(self, "position", p)
+        return _get_named_item(self, "name", "position", p)
 
     def get_velocity(self, v: str | int):
-        return _get_item(self, "velocity", v)
+        return _get_named_item(self, "name", "velocity", v)
 
     def get_effort(self, e: str | int):
-        return _get_item(self, "effort", e)
+        return _get_named_item(self, "name", "effort", e)
 
     def get_external_torque(self, e: str | int):
-        return _get_item(self, "external_torque", e)
+        return _get_named_item(self, "name", "external_torque", e)
 
     # -------- factory --------
     @classmethod
@@ -92,15 +98,34 @@ def _add_joint_state_helpers(cls):
 # ----------------------------------------------------------------------
 def _add_joy_helpers(cls):
 
+    # -------- read --------
+    def get_axis(self, a: str | int | list[str] | list[int]):
+        return _get_named_item(self, "axis_names", "axes", a)
+
+    def get_button(self, b: str | int | list[str] | list[int]):
+        return _get_named_item(self, "button_names", "buttons", a)
+
     # -------- factory --------
     @classmethod
-    def init(c, axes: list[float] = [], buttons: list[int] = []):
+    def init(
+        c,
+        axis_names: list[str],
+        axes: list[float] = [],
+        button_names: list[str] = [],
+        buttons: list[int] = [],
+    ):
         obj = c()
         obj.naxes = len(axes)
         obj.axes = axes
+        obj.axis_names = axis_names
         obj.nbuttons = len(buttons)
         obj.buttons = buttons
+        obj.button_names = button_names
         return obj
+
+    cls.init = init
+    cls.get_axis = get_axis
+    cls.get_button = get_button
 
     return cls
 

@@ -29,11 +29,17 @@ struct joy_t {
     // Number of analog axes reported by the device.
     int8_t naxes;
 
+    // Axis names
+    string axis_names[naxes];
+
     // Current value of each axis (typically normalized in [-1, 1]).
     float axes[naxes];
 
     // Number of buttons on the device.
     int8_t nbuttons;
+
+    // Button names
+    string button_names[nbuttons];
 
     // Current state of each button (0 = released, non-zero = pressed).
     int32_t buttons[nbuttons];
