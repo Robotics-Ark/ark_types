@@ -1,0 +1,15 @@
+package _arktypes_robot;
+
+struct joint_state_t {
+    int16_t ndof;
+    string name[ndof];
+    float position[ndof];
+    float velocity[ndof];
+    float effort[ndof];
+    float ext_torque[ndof];
+}
+
+struct joint_state_stamped_t {
+    int64_t stamp;
+    _arktypes_robot.joint_state_t joint_state;
+}

@@ -1,0 +1,29 @@
+package _arktypes_geometry;
+
+struct vector3_t {
+    float x;
+    float y;
+    float z;
+}
+
+struct quaternion_t {
+    float x;
+    float y;
+    float z;
+    float w;
+}
+
+struct transform_t {
+    vector3_t translation;
+    quaternion_t rotation;
+}
+
+struct twist_t {
+    vector3_t linear;
+    vector3_t angular;
+}
+
+struct wrench_t {
+    vector3_t force;
+    vector3_t torque;
+}

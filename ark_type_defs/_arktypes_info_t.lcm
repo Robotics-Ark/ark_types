@@ -1,4 +1,4 @@
-package arktypes;
+package _arktypes_info;
 
 struct service_info_t {
     string comms_type;
