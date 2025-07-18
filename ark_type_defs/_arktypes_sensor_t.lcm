@@ -113,15 +113,6 @@ struct image_t {
   const int8_t COMPRESSION_METHOD_INVALID        = -1;
 }
 
-// Synchronized RGBD (Image + Depth)
-struct rgbd_t {
-  // RGB image.
-  image_t image;
-
-  // Depth map.
-  image_t depth;
-}
-
 // Laser Scan
 struct laser_scan_t {
     // Number of valid samples in this scan.
