@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from PIL import Image
+from functools import wraps
 from scipy.spatial.transform import Rotation as Rot
 
 # ----------------------------------------------------------------------
@@ -128,9 +129,6 @@ def _add_joy_helpers(cls):
     return cls
 
 
-# ----------------------------------------------------------------------
-# helpers specific to image_t
-# ----------------------------------------------------------------------
 # ----------------------------------------------------------------------
 # helpers specific to image_t
 # ----------------------------------------------------------------------
@@ -335,10 +333,74 @@ def _add_image_helpers(cls):
 # ----------------------------------------------------------------------
 # helpers specific to laser_scan_helpers_t
 # ----------------------------------------------------------------------
+def _patch_laser_scan_with_arraylists(cls):
+    """
+    Monkey‑patch *cls* so that *seq_fields* are automatically wrapped
+    in `ArrayList` after both init‑helpers **and** every decode path.
+
+    Parameters
+    ----------
+    cls : generated LCM class
+    seq_fields : iterable of field names that should become ArrayLists
+    """
+
+    seq_fields = ("angles", "ranges")
+
+    class ArrayList(list):
+        """list with a .as_array() helper."""
+
+        __slots__ = ()
+
+        def as_array(self):
+            return np.array(self)
+
+    # ---- 1. factory to wrap an already‑decoded instance ----
+    def _wrap_lists(obj):
+        for name in seq_fields:
+            val = getattr(obj, name)
+            # Only wrap if it's a plain list; avoids double‑wrapping.
+            if isinstance(val, list) and not isinstance(val, ArrayList):
+                setattr(obj, name, ArrayList(val))
+        return obj
+
+    # ---- 2. patch decode() ----
+    original_decode = cls.decode
+
+    @staticmethod
+    @wraps(original_decode)
+    def decode(data):
+        return _wrap_lists(original_decode(data))
+
+    cls.decode = decode  # replace on the class
+
+    # ---- 3. expose helper for outside use ----
+    cls._wrap_lists_post_decode = staticmethod(_wrap_lists)
+
+    return cls  # allow decorator‑style use
+
+
 def _add_laser_scan_helpers(cls):
-    # TODO
+
     # -------- read --------
+    # def as_array(self):
+    #     return np.array(self)
+
     # -------- factory --------
+    @classmethod
+    def init(c, angles: list[float] | np.ndarray, ranges: list[float] | np.ndarray):
+        """Factory to create a `laser_scan_t` from angles and ranges."""
+        if len(angles) != len(ranges):
+            raise ValueError("angles and ranges must have the same length")
+
+        obj = c()
+        obj.angles = np.asarray(angles).flatten().tolist()
+        obj.ranges = np.asarray(ranges).flatten().tolist()
+        obj.n = len(obj.angles)
+        return obj
+
+    # ------ patch class ------
+    cls.init = init
+
     return cls
 
 
@@ -346,9 +408,41 @@ def _add_laser_scan_helpers(cls):
 # helpers specific to imu_t
 # ----------------------------------------------------------------------
 def _add_imu_helpers(cls):
-    # TODO
+
     # -------- read --------
+    def as_array(self):
+        return np.array([getattr(self, s) for s in self.__slots__])
+
     # -------- factory --------
+    @classmethod
+    def init(
+        c,
+        orientation: list[float] | np.ndarray | Rot,
+        angular_velocity: list[float] | np.ndarray,
+        linear_acceleration: list[float] | np.ndarray,
+    ):
+        """Factory to create an `imu_t` from orientation, angular velocity, and linear acceleration."""
+
+        # Ensure orientation is a array-like
+        if isinstance(orientation, Rot):
+            orientation = orientation.as_quat().tolist()
+
+        def init_array(obj, array):
+            for i, d in enumerate(obj.__slots__):
+                setattr(obj, d, array[i])
+
+        obj = c()
+        init_array(obj.orientation, orientation)
+        init_array(obj.angular_velocity, angular_velocity)
+        init_array(obj.linear_acceleration, linear_acceleration)
+
+        return obj
+
+    # ------ patch class ------
+    cls.orientation.as_array = as_array
+    cls.angular_velocity.as_array = as_array
+    cls.linear_acceleration.as_array = as_array
+
     return cls
 
 
@@ -359,6 +453,7 @@ _add_joint_state_helpers(_joint_state_t)
 _add_joy_helpers(_joy_t)
 _add_image_helpers(_image_t)
 _add_laser_scan_helpers(_laser_scan_t)
+_patch_laser_scan_with_arraylists(_laser_scan_t)
 _add_imu_helpers(_imu_t)
 
 # ----------------------------------------------------------------------
