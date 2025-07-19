@@ -85,7 +85,7 @@ def test_image_from_array_roundtrip(array, expected_mode):
     np.testing.assert_array_equal(msg.as_array(), array)
 
     # PIL conversion ---------------------------------------------------------
-    pil_img = msg.as_pil()
+    pil_img = msg.as_image()
     assert pil_img.mode == expected_mode
     np.testing.assert_array_equal(
         np.asarray(pil_img), array if array.ndim == 3 else array
@@ -118,18 +118,18 @@ def test_image_from_array_mismatched_pixel_format_raises():
 # -----------------------------------------------------------------------------
 
 
-def test_image_from_pil_file_roundtrip():
-    """Verify from_pil/as_pil preserve data using the provided test image."""
+def test_image_from_image_file_roundtrip():
+    """Verify from_image/as_image preserve data using the provided test image."""
     path = Path(__file__).with_name("kuka.png")
     img = Image.open(path)
 
-    msg = image_t.from_pil(img, frame_name="camera")
+    msg = image_t.from_image(img, frame_name="camera")
 
     arr = np.asarray(img)
     np.testing.assert_array_equal(msg.as_array(), arr)
 
     # round‑trip back to PIL --------------------------------------------------
-    img2 = msg.as_pil()
+    img2 = msg.as_image()
     np.testing.assert_array_equal(np.asarray(img2), arr)
 
     # encoded->decoded consistency ------------------------------------------

@@ -29,9 +29,9 @@ def _get_named_item(
         return arr[x]
     elif isinstance(x, str):
         name_arr = getattr(self, name_attr)
-        return _get_named_item(self, attr_name, name_attr_array, name_arr.index(x))
+        return _get_named_item(self, name_attr, name_attr_array, name_arr.index(x))
     elif isinstance(x, list):
-        return [_get_named_item(self, name_attr, name_attr_array) for i in x]
+        return [_get_named_item(self, name_attr, name_attr_array, i) for i in x]
     else:
         raise ValueError(f"x must be a 'str' or 'int', got {type(x)}")
 
@@ -102,7 +102,7 @@ def _add_joy_helpers(cls):
         return _get_named_item(self, "axis_names", "axes", a)
 
     def get_button(self, b: str | int | list[str] | list[int]):
-        return _get_named_item(self, "button_names", "buttons", a)
+        return _get_named_item(self, "button_names", "buttons", b)
 
     # -------- factory --------
     @classmethod
@@ -136,9 +136,9 @@ def _add_image_helpers(cls):
     """
     Patch the raw `image_t` class in-place with:
         * as_array()  → numpy.ndarray            (no copy by default)
-        * as_pil()    → PIL.Image                (RGB/RGBA/L as appropriate)
+        * as_image()    → PIL.Image                (RGB/RGBA/L as appropriate)
         * from_array() → `image_t` factory       (uncompressed)
-        * from_pil()   → `image_t` factory       (uncompressed)
+        * from_image()   → `image_t` factory       (uncompressed)
 
     Only the “not-compressed” path is handled; any other compression_method
     raises NotImplementedError.
@@ -225,7 +225,7 @@ def _add_image_helpers(cls):
 
         return arr.copy() if copy else arr
 
-    def as_pil(self) -> Image.Image:
+    def as_image(self) -> Image.Image:
         """Return a `PIL.Image` view of the data (RGB/RGBA/L)."""
         arr = self.as_array(copy=False)
 
@@ -306,7 +306,7 @@ def _add_image_helpers(cls):
         return msg
 
     @classmethod
-    def from_pil(c, img: Image.Image, *, frame_name: str = "") -> "image_t":
+    def from_image(c, img: Image.Image, *, frame_name: str = "") -> "image_t":
         """Build an `image_t` from a `PIL.Image`."""
         mode_to_pf = {
             "L": cls.PIXEL_FORMAT_GRAY,
@@ -324,9 +324,9 @@ def _add_image_helpers(cls):
     # ------------------------------------------------------------------
     # patch class -------------------------------------------------------
     cls.as_array = as_array
-    cls.as_pil = as_pil
+    cls.as_image = as_image
     cls.from_array = from_array
-    cls.from_pil = from_pil
+    cls.from_image = from_image
     return cls
 
 
@@ -335,35 +335,41 @@ def _add_image_helpers(cls):
 # ----------------------------------------------------------------------
 def _patch_laser_scan_with_arraylists(cls):
     """
-    Monkey‑patch *cls* so that *seq_fields* are automatically wrapped
-    in `ArrayList` after both init‑helpers **and** every decode path.
+    Monkey‑patch *cls* (the generated `laser_scan_t` class) so that its
+    sequence fields are automatically wrapped in an `ArrayList` helper
+    both after factory helpers **and** every `decode()` call.
 
-    Parameters
-    ----------
-    cls : generated LCM class
-    seq_fields : iterable of field names that should become ArrayLists
+    The resulting `scan.angles` / `scan.ranges` behave like normal lists
+    but also expose `.as_array()` -> NumPy ndarray, which the tests rely on.
     """
 
+    # The fields that should be wrapped
     seq_fields = ("angles", "ranges")
 
     class ArrayList(list):
-        """list with a .as_array() helper."""
+        """A list subclass that adds a convenient `.as_array()` method."""
 
         __slots__ = ()
 
         def as_array(self):
-            return np.array(self)
+            # Return a *copy* as ndarray to avoid implicit mutations
+            return np.asarray(self)
 
-    # ---- 1. factory to wrap an already‑decoded instance ----
+    # ------------------------------------------------------------------
+    # 1. helper to (re)wrap an *instance* in‑place
+    # ------------------------------------------------------------------
     def _wrap_lists(obj):
         for name in seq_fields:
             val = getattr(obj, name)
-            # Only wrap if it's a plain list; avoids double‑wrapping.
-            if isinstance(val, list) and not isinstance(val, ArrayList):
+            # Accept list **or tuple**; avoid double‑wrapping
+            if isinstance(val, (list, tuple)) and not isinstance(val, ArrayList):
                 setattr(obj, name, ArrayList(val))
         return obj
 
-    # ---- 2. patch decode() ----
+    # ------------------------------------------------------------------
+    # 2. patch the class‑level static decode() so every decode result
+    #    is automatically wrapped before it leaves the function.
+    # ------------------------------------------------------------------
     original_decode = cls.decode
 
     @staticmethod
@@ -371,20 +377,18 @@ def _patch_laser_scan_with_arraylists(cls):
     def decode(data):
         return _wrap_lists(original_decode(data))
 
-    cls.decode = decode  # replace on the class
+    cls.decode = decode  # override
 
-    # ---- 3. expose helper for outside use ----
+    # ------------------------------------------------------------------
+    # 3. expose the helper so factory methods (e.g. cls.init) can call
+    #    it explicitly on freshly‑created objects.
+    # ------------------------------------------------------------------
     cls._wrap_lists_post_decode = staticmethod(_wrap_lists)
 
     return cls  # allow decorator‑style use
 
 
 def _add_laser_scan_helpers(cls):
-
-    # -------- read --------
-    # def as_array(self):
-    #     return np.array(self)
-
     # -------- factory --------
     @classmethod
     def init(c, angles: list[float] | np.ndarray, ranges: list[float] | np.ndarray):
@@ -396,11 +400,13 @@ def _add_laser_scan_helpers(cls):
         obj.angles = np.asarray(angles).flatten().tolist()
         obj.ranges = np.asarray(ranges).flatten().tolist()
         obj.n = len(obj.angles)
+
+        obj = cls._wrap_lists_post_decode(obj)
+
         return obj
 
     # ------ patch class ------
     cls.init = init
-
     return cls
 
 
@@ -408,10 +414,30 @@ def _add_laser_scan_helpers(cls):
 # helpers specific to imu_t
 # ----------------------------------------------------------------------
 def _add_imu_helpers(cls):
+    """
+    Patch imu_t so you can (a) build one easily from arrays/Rotation, and
+    (b) grab NumPy views of its nested orientation / angular_velocity /
+    linear_acceleration fields.
+
+    NOTE: We *do not* attach helpers to the member descriptors (cls.orientation,
+    etc.) because those are slot descriptors without their own attribute
+    namespace. Instead we add *methods on the imu_t class* that reach inward.
+    """
+
+    # --- generic -------------------------------------------------------------
+    def _slots_to_array(obj) -> np.ndarray:
+        # Works for any LCM struct w/ __slots__
+        return np.array([getattr(obj, s) for s in obj.__slots__], dtype=float)
 
     # -------- read --------
-    def as_array(self):
-        return np.array([getattr(self, s) for s in self.__slots__])
+    def orientation_as_array(self) -> np.ndarray:
+        return _slots_to_array(self.orientation)
+
+    def angular_velocity_as_array(self) -> np.ndarray:
+        return _slots_to_array(self.angular_velocity)
+
+    def linear_acceleration_as_array(self) -> np.ndarray:
+        return _slots_to_array(self.linear_acceleration)
 
     # -------- factory --------
     @classmethod
@@ -421,27 +447,46 @@ def _add_imu_helpers(cls):
         angular_velocity: list[float] | np.ndarray,
         linear_acceleration: list[float] | np.ndarray,
     ):
-        """Factory to create an `imu_t` from orientation, angular velocity, and linear acceleration."""
+        """
+        Build an imu_t.
 
-        # Ensure orientation is a array-like
+        *orientation* may be a scipy Rotation; it will be converted to quat
+        in (x, y, z, w) or (w, x, y, z) order depending on the generated type's slots.
+        We simply fill slots in order; caller must supply matching ordering if
+        not using Rot.
+        """
+        # Convert orientation --------------------------------------------------
         if isinstance(orientation, Rot):
-            orientation = orientation.as_quat().tolist()
+            # SciPy returns as (x, y, z, w)
+            orientation = orientation.as_quat()  # ndarray, shape (4,)
+        orientation = np.asarray(orientation, dtype=float).flatten()
 
-        def init_array(obj, array):
-            for i, d in enumerate(obj.__slots__):
-                setattr(obj, d, array[i])
+        ang = np.asarray(angular_velocity, dtype=float).flatten()
+        acc = np.asarray(linear_acceleration, dtype=float).flatten()
 
         obj = c()
-        init_array(obj.orientation, orientation)
-        init_array(obj.angular_velocity, angular_velocity)
-        init_array(obj.linear_acceleration, linear_acceleration)
+
+        # Helper to stuff an array into an LCM sub-struct in slot order --------
+        def _fill(subobj, arr, name):
+            slots = getattr(subobj, "__slots__", None)
+            if slots is None:
+                raise AttributeError(f"{name} has no __slots__ (unexpected)")
+            if len(arr) != len(slots):
+                raise ValueError(f"{name} expects {len(slots)} values; got {len(arr)}")
+            for s, v in zip(slots, arr):
+                setattr(subobj, s, float(v))
+
+        _fill(obj.orientation, orientation, "orientation")
+        _fill(obj.angular_velocity, ang, "angular_velocity")
+        _fill(obj.linear_acceleration, acc, "linear_acceleration")
 
         return obj
 
     # ------ patch class ------
-    cls.orientation.as_array = as_array
-    cls.angular_velocity.as_array = as_array
-    cls.linear_acceleration.as_array = as_array
+    cls.orientation_as_array = orientation_as_array
+    cls.angular_velocity_as_array = angular_velocity_as_array
+    cls.linear_acceleration_as_array = linear_acceleration_as_array
+    cls.init = init
 
     return cls
 
@@ -467,6 +512,7 @@ imu_t = _imu_t
 
 __all__ = [
     "joint_state_t",
+    "joy_t",
     "image_t",
     "laser_scan_t",
     "imu_t",
