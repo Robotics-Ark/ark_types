@@ -231,4 +231,6 @@ __all__ = [
     "vector3_t",
     "quaternion_t",
     "transform_t",
+    "twist_t",
+    "wrench_t",
 ]
