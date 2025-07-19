@@ -41,7 +41,7 @@ def _add_float_array_helpers(cls):
     # -------- read --------
     def as_array(self):
         """Convert to numpy array."""
-        return np.array(self.data)
+        return np.array(self.data, dtype=float)
 
     # -------- factory --------
     @classmethod
@@ -50,7 +50,8 @@ def _add_float_array_helpers(cls):
 
         obj = c()
 
-        array = np.asarray(array).flatten()
+        array = np.asarray(array, dtype=float)
+        assert array.ndim == 1, "Input must be a 1D array or list"
         obj.n = int(array.shape[0])
         obj.data = array.tolist()
 
