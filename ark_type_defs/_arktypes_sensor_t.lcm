@@ -20,7 +20,7 @@ struct joint_state_t {
     float effort[ndof];
 
     // External torque estimated or sensed at each joint.
-    float ext_torque[ndof];
+    float external_torque[ndof];
 }
 
 // Joystick state message.
