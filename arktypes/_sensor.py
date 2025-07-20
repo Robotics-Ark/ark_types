@@ -24,6 +24,21 @@ def _get_named_item(
     name_attr_array: str,
     x: str | int | list[str] | list[int],
 ):
+    """
+    Retrieve an item from an array attribute using a corresponding name list.
+
+    Args:
+        self: The object containing the named fields.
+        name_attr: Attribute name holding the list of names.
+        name_attr_array: Attribute name holding the values.
+        x: A single index, name, or a list of indices/names.
+
+    Returns:
+        A single value or a list of values corresponding to the names/indices.
+
+    Raises:
+        ValueError: If `x` is not a supported type.
+    """
     if isinstance(x, int):
         arr = getattr(self, name_attr_array)
         return arr[x]
@@ -40,18 +55,29 @@ def _get_named_item(
 # helpers specific to joint_state_t
 # ----------------------------------------------------------------------
 def _add_joint_state_helpers(cls):
+    """
+    Add convenience accessors and initialization helper to `joint_state_t`.
+
+    Adds:
+        - get_position, get_velocity, get_effort, get_external_torque
+        - init() factory
+    """
 
     # -------- read --------
     def get_position(self, p: str | int):
+        """Retrieve position by joint name or index."""
         return _get_named_item(self, "name", "position", p)
 
     def get_velocity(self, v: str | int):
+        """Retrieve velocity by joint name or index."""
         return _get_named_item(self, "name", "velocity", v)
 
     def get_effort(self, e: str | int):
+        """Retrieve effort by joint name or index."""
         return _get_named_item(self, "name", "effort", e)
 
     def get_external_torque(self, e: str | int):
+        """Retrieve external torque by joint name or index."""
         return _get_named_item(self, "name", "external_torque", e)
 
     # -------- factory --------
@@ -64,14 +90,25 @@ def _add_joint_state_helpers(cls):
         effort: list[float] | np.ndarray = None,
         external_torque: list[float] | np.ndarray = None,
     ):
+        """
+        Factory for joint_state_t from given name, position, and optional values.
+
+        Args:
+            name: List of joint names.
+            position: Joint positions.
+            velocity: Optional velocities.
+            effort: Optional efforts.
+            external_torque: Optional external torques.
+
+        Returns:
+            joint_state_t instance.
+        """
 
         ndof = len(name)
 
         def parse(x):
-            if x is not None:
-                return np.asarray(x).flatten().tolist()
-            else:
-                return np.zeros(ndof)
+            """Helper to parse optional arrays or fill with zeros."""
+            return np.asarray(x).flatten().tolist() if x is not None else np.zeros(ndof)
 
         obj = c()
         obj.ndof = ndof
@@ -96,12 +133,21 @@ def _add_joint_state_helpers(cls):
 # helpers specific to joy_t
 # ----------------------------------------------------------------------
 def _add_joy_helpers(cls):
+    """
+    Add helpers to the `joy_t` message for accessing and constructing joystick data.
+
+    Adds:
+        - get_axis(), get_button(): Read individual joystick elements by name/index.
+        - init(): Factory method to construct a complete joy_t instance.
+    """
 
     # -------- read --------
     def get_axis(self, a: str | int | list[str] | list[int]):
+        """Get joystick axis/axes by name(s) or index/indices."""
         return _get_named_item(self, "axis_names", "axes", a)
 
     def get_button(self, b: str | int | list[str] | list[int]):
+        """Get joystick button(s) by name(s) or index/indices."""
         return _get_named_item(self, "button_names", "buttons", b)
 
     # -------- factory --------
@@ -113,6 +159,18 @@ def _add_joy_helpers(cls):
         button_names: list[str] = [],
         buttons: list[int] = [],
     ):
+        """
+        Factory for creating a joy_t message with named axes and buttons.
+
+        Args:
+            axis_names: List of axis names.
+            axes: Corresponding axis values.
+            button_names: List of button names.
+            buttons: Corresponding button states.
+
+        Returns:
+            joy_t instance.
+        """
         obj = c()
         obj.naxes = len(axes)
         obj.axes = axes
@@ -134,14 +192,13 @@ def _add_joy_helpers(cls):
 # ----------------------------------------------------------------------
 def _add_image_helpers(cls):
     """
-    Patch the raw `image_t` class in-place with:
-        * as_array()  → numpy.ndarray            (no copy by default)
-        * as_image()    → PIL.Image                (RGB/RGBA/L as appropriate)
-        * from_array() → `image_t` factory       (uncompressed)
-        * from_image()   → `image_t` factory       (uncompressed)
+    Add array and image conversion utilities to the `image_t` message.
 
-    Only the “not-compressed” path is handled; any other compression_method
-    raises NotImplementedError.
+    Adds:
+        - as_array(): Convert raw image data to a NumPy array.
+        - as_image(): Convert raw data to a PIL.Image object.
+        - from_array(): Factory to construct image_t from a NumPy array.
+        - from_image(): Factory to construct image_t from a PIL.Image.
     """
 
     # ------------------------------------------------------------------
@@ -335,30 +392,50 @@ def _add_image_helpers(cls):
 # ----------------------------------------------------------------------
 def _patch_laser_scan_with_arraylists(cls):
     """
-    Monkey‑patch *cls* (the generated `laser_scan_t` class) so that its
-    sequence fields are automatically wrapped in an `ArrayList` helper
-    both after factory helpers **and** every `decode()` call.
+    Patch the `laser_scan_t` class so that its `angles` and `ranges`
+    fields are wrapped with a helper that provides `.as_array()`.
 
-    The resulting `scan.angles` / `scan.ranges` behave like normal lists
-    but also expose `.as_array()` -> NumPy ndarray, which the tests rely on.
+    This function:
+    - Wraps `angles` and `ranges` with a subclass of list (`ArrayList`) that adds `.as_array()`.
+    - Overrides the class-level `decode()` method to apply wrapping post-deserialization.
+    - Exposes `_wrap_lists_post_decode()` for optional manual use.
     """
 
     # The fields that should be wrapped
     seq_fields = ("angles", "ranges")
 
     class ArrayList(list):
-        """A list subclass that adds a convenient `.as_array()` method."""
+        """
+        A list subclass that adds a convenient `.as_array()` method.
+
+        This allows the user to call `.as_array()` on angles and ranges
+        to retrieve them as NumPy arrays.
+        """
 
         __slots__ = ()
 
         def as_array(self):
-            # Return a *copy* as ndarray to avoid implicit mutations
+            """
+            Return a copy of the list contents as a NumPy array.
+
+            Returns:
+                np.ndarray: Array of list values.
+            """
             return np.asarray(self)
 
     # ------------------------------------------------------------------
     # 1. helper to (re)wrap an *instance* in‑place
     # ------------------------------------------------------------------
     def _wrap_lists(obj):
+        """
+        Replace fields in the object with `ArrayList` if applicable.
+
+        Args:
+            obj: The laser_scan_t instance to patch.
+
+        Returns:
+            The patched instance with wrapped fields.
+        """
         for name in seq_fields:
             val = getattr(obj, name)
             # Accept list **or tuple**; avoid double‑wrapping
@@ -375,6 +452,18 @@ def _patch_laser_scan_with_arraylists(cls):
     @staticmethod
     @wraps(original_decode)
     def decode(data):
+        """
+        Override for the class's decode method.
+
+        Ensures that decoded instances have their fields wrapped
+        with `ArrayList` for convenient usage.
+
+        Args:
+            data (bytes): The raw LCM data to decode.
+
+        Returns:
+            An instance of laser_scan_t with wrapped list fields.
+        """
         return _wrap_lists(original_decode(data))
 
     cls.decode = decode  # override
@@ -389,6 +478,13 @@ def _patch_laser_scan_with_arraylists(cls):
 
 
 def _add_laser_scan_helpers(cls):
+    """
+    Add an initialization helper for `laser_scan_t`.
+
+    Adds:
+        - init(): Factory method for setting angles and ranges.
+    """
+
     # -------- factory --------
     @classmethod
     def init(c, angles: list[float] | np.ndarray, ranges: list[float] | np.ndarray):
@@ -407,6 +503,7 @@ def _add_laser_scan_helpers(cls):
 
     # ------ patch class ------
     cls.init = init
+
     return cls
 
 
