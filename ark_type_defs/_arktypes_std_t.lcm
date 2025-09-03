@@ -1,0 +1,20 @@
+package _arktypes_std;
+
+// Common message types representing primitive data.
+
+// Flag message for carrying a single 64-bit signed integer (can be used in experiments).
+struct flag_t {
+
+    // Integer value.
+    int64_t data;
+}
+
+// Variable‑length array of floating-point values.
+struct float_array_t {
+
+    // Number of valid elements in `data`.
+    int64_t n;
+
+    // Floating-point elements.
+    float data[n];
+}
