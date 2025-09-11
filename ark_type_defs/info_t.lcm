@@ -56,3 +56,8 @@ struct network_info_t {
     int64_t n_nodes;            // Number of nodes in the network
     node_info_t nodes[n_nodes];  // Array to hold nodes
 }
+
+struct service_response_t {
+    int64_t success;
+    string message;
+}
