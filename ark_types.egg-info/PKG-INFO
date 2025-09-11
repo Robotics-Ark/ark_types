@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: ark-types
-Version: 1.0.0
-License-File: LICENCE
-Requires-Dist: lcm
-Dynamic: license-file
-Dynamic: requires-dist
