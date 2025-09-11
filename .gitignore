@@ -1,7 +1,50 @@
-# arktypes/
-arktypes.egg-info/
-build/
-# Ignore Python bytecode files
-*.pyc
+# --- Python bytecode ---
 __pycache__/
+*.py[cod]
+*$py.class
+
+# --- Packaging / build ---
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# --- Virtual envs ---
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# --- Tests / coverage ---
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+
+# --- Type checkers / linters ---
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- Logs ---
+*.log
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+arktypes/*.py
 arktypes/*.py
