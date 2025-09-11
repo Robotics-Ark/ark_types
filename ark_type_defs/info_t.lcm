@@ -58,8 +58,6 @@ struct network_info_t {
 }
 
 struct status_t {
-    // success returns True/False if its successful or not
-    // message returns the error message, or the success message
-    int64_t success;
-    string message;
+    int64_t success; // success returns True/False if its successful or not
+    string message; // message returns the error message, or the success message
 }
