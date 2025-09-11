@@ -57,7 +57,9 @@ struct network_info_t {
     node_info_t nodes[n_nodes];  // Array to hold nodes
 }
 
-struct service_response_t {
+struct status_t {
+    // success returns True/False if its successful or not
+    // message returns the error message, or the success message
     int64_t success;
     string message;
 }
